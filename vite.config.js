@@ -1,11 +1,18 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Cau hinh Vite - cong cu chay va build website
+// Cấu hình Vite để build ổn định trên các nền tảng như Vercel/GitHub
 export default defineConfig({
   plugins: [react()],
-  server: {
-    port: 5173,
-    open: true
+  build: {
+    // Đảm bảo rollup tìm đúng file gốc
+    rollupOptions: {
+      input: './index.html'
+    }
+  },
+  resolve: {
+    alias: {
+      '@': '/src'
+    }
   }
 })
