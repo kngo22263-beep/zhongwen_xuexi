@@ -12,7 +12,8 @@ export default function Navbar() {
     { to: '/', label: 'Trang chủ', end: true },
     { to: '/ebook', label: 'Ebook' },
     { to: '/vocabulary', label: 'Từ vựng' },
-    { to: '/review', label: 'Ôn tập' }
+    { to: '/review', label: 'Ôn tập' },
+    { to: '/evaluation', label: 'Đánh giá' },
   ]
 
   function handleLogout() {

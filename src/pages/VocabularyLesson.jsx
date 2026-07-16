@@ -8,6 +8,7 @@ import QuizPanel from './vocab/QuizPanel.jsx'
 import FlashcardPanel from './vocab/FlashcardPanel.jsx'
 import BulkImportModal from './vocab/BulkImportModal.jsx'
 import { getLesson, getWords } from '../services/vocabService.js'
+import { recordLessonOpen } from '../services/studyService.js'
 import { formatDate } from '../utils/dateUtils.js'
 
 export default function VocabularyLesson() {
@@ -26,6 +27,11 @@ export default function VocabularyLesson() {
     setLesson(ls)
     setWords(ws || [])
     setLoading(false)
+
+    // Ghi nhan nguoi dung mo bai hoc nay (cho danh gia hoc tap)
+    if (ls) {
+      recordLessonOpen(lessonId, ls.name, (ws || []).length)
+    }
   }
   useEffect(() => { loadAll() }, [lessonId])
 
@@ -58,8 +64,8 @@ export default function VocabularyLesson() {
               {tab === 'vocab' && (
                 <WordList lessonId={lessonId} words={words} onReload={loadAll} onOpenBulk={() => setShowBulk(true)} />
               )}
-              {tab === 'flashcard' && <FlashcardPanel words={words} />}
-              {tab === 'quiz' && <QuizPanel words={words} />}
+              {tab === 'flashcard' && <FlashcardPanel lessonId={lessonId} words={words} />}
+              {tab === 'quiz' && <QuizPanel lessonId={lessonId} words={words} />}
             </>
           )}
         </div>

@@ -1,17 +1,21 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { generateQuiz, generateMatchQuiz } from '../../services/quizService.js'
+import { recordQuizResult } from '../../services/studyService.js'
 import { QUIZ_TYPES, QUESTION_COUNTS, DIFFICULTY_LEVELS } from '../../utils/constants.js'
 
-export default function QuizPanel({ words }) {
+export default function QuizPanel({ lessonId, words }) {
+  const navigate = useNavigate()
   const [running, setRunning] = useState(false)
   const [loading, setLoading] = useState(false)
   const [questions, setQuestions] = useState([])
   const [answers, setAnswers] = useState({})
   const [submitted, setSubmitted] = useState(false)
+  const [currentType, setCurrentType] = useState('')
 
   async function handleStart(type, count, topic) {
     if (!words || words.length < 3) { alert('Cần ít nhất 3 từ vựng trong bài để tạo câu hỏi.'); return }
-    setAnswers({}); setSubmitted(false)
+    setAnswers({}); setSubmitted(false); setCurrentType(type)
     if (type === 'match') {
       setLoading(true)
       try {
@@ -30,6 +34,17 @@ export default function QuizPanel({ words }) {
     let c = 0
     questions.forEach((q, i) => { if ((answers[i] || '').trim() === q.answer.trim()) c++ })
     return c
+  }
+
+  function handleSubmit() {
+    setSubmitted(true)
+    const total = questions.length
+    const correct = score()
+    // Ghi nhan ket qua kiem tra cho danh gia hoc tap
+    if (lessonId) {
+      const typeName = QUIZ_TYPES.find((t) => t.id === currentType)?.title || currentType
+      recordQuizResult(lessonId, total, correct, typeName)
+    }
   }
 
   if (loading) {
@@ -91,11 +106,14 @@ export default function QuizPanel({ words }) {
           })}
         </div>
         {!submitted ? (
-          <button onClick={() => setSubmitted(true)} className="mt-5 w-full py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold">Nộp bài</button>
+          <button onClick={handleSubmit} className="mt-5 w-full py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold">Nộp bài</button>
         ) : (
           <div className="mt-5 text-center bg-brand-50 rounded-xl p-4">
             <p className="text-lg font-bold text-brand-700">Kết quả: {score()} / {questions.length} câu đúng</p>
-            <button onClick={() => setRunning(false)} className="mt-3 px-5 py-2 rounded-lg bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold">Làm bài khác</button>
+            <div className="flex items-center justify-center gap-3 mt-3">
+              <button onClick={() => setRunning(false)} className="px-5 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm font-semibold text-gray-700">Làm bài khác</button>
+              <button onClick={() => navigate('/evaluation')} className="px-5 py-2 rounded-lg bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold">📊 Đánh giá học tập</button>
+            </div>
           </div>
         )}
       </div>
