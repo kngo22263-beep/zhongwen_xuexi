@@ -10,6 +10,7 @@ export default function Navbar() {
 
   const menu = [
     { to: '/', label: 'Trang chủ', end: true },
+    { to: '/hsk', label: 'Học HSK' },
     { to: '/ebook', label: 'Ebook' },
     { to: '/vocabulary', label: 'Từ vựng' },
     { to: '/review', label: 'Ôn tập' },

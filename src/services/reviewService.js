@@ -1,38 +1,40 @@
 import { askGemini } from '../lib/aiClient.js'
 
-/**
- * Tao doan van on tap bang AI Gemini.
- * @param {object} p
- * @param {string} p.vocab - tu vung nguoi dung nhap
- * @param {number} p.sentenceCount - so cau mong muon
- * @param {string} p.hskLevel - cap do HSK
- * @returns {Promise<{lines: Array<{hanzi, pinyin, meaning}>, level, count}>}
- */
 export async function generateReviewPassage({ vocab, sentenceCount, hskLevel }) {
   const level = hskLevel || 'HSK1'
   const count = sentenceCount || 20
 
-  // Loi yeu cau gui cho AI (prompt)
-  const prompt = `Bạn là giáo viên tiếng Trung. Hãy viết MỘT đoạn văn tiếng Trung tự nhiên, mạch lạc, phù hợp trình độ ${level}.
+  const prompt = `你是一位专业的中文教师。请根据以下要求写一篇中文文章：
 
-YÊU CẦU:
-- Đoạn văn có khoảng ${count} câu.
-- Cố gắng sử dụng các từ vựng sau (nếu hợp lý): ${vocab}
-- Nội dung dễ hiểu, đúng ngữ pháp, phù hợp người học ${level}.
+要求：
+1. 文章长度：大约${count}句话，形成完整的段落。
+2. 词汇：尽量使用以下词汇（自然融入文章中）：${vocab}
+3. 难度等级：${level}
+4. 文章要求：
+   - 写成一个完整的故事或议论文，有开头、发展和结尾
+   - 句子之间要有逻辑关系，使用连接词（因此、然而、同时、虽然...但是、不仅...还、由于、于是、在...的过程中 等）
+   - 不要写成单独的短句，要写成像文章一样的长段落
+   - 段落之间用空行分隔（写2-4个段落）
+   - 内容要贴近生活，可以写关于学习、工作、旅行、创业、友情等主题
+   - 语法要正确自然
 
-ĐỊNH DẠNG TRẢ VỀ (RẤT QUAN TRỌNG):
-- Trả về DUY NHẤT một mảng JSON hợp lệ, KHÔNG kèm giải thích, KHÔNG kèm dấu \`\`\`.
-- Mỗi phần tử là một câu, gồm 3 trường:
-  {"hanzi": "câu chữ Hán", "pinyin": "phiên âm pinyin có dấu", "meaning": "nghĩa tiếng Việt"}
+格式要求（非常重要）：
+- 只返回一个合法的JSON数组，不要解释，不要加反引号
+- 每个元素代表一个段落，包含3个字段：
+  {"hanzi": "整个段落的中文内容（多句话连在一起）", "pinyin": "整个段落的拼音", "meaning": "整个段落的越南语翻译"}
 
-VÍ DỤ:
-[{"hanzi":"我是学生。","pinyin":"wǒ shì xué shēng.","meaning":"Tôi là học sinh."}]`
+示例格式：
+[{"hanzi":"在经历了这么多变化以后，小林终于对创业有了更加全面而深刻的理解。他明白，在这个高速发展的时代里，成功不仅仅依靠技术，更需要持续的努力与清晰的方向。","pinyin":"zài jīnglì le zhème duō biànhuà yǐhòu, xiǎo lín zhōngyú duì chuàngyè yǒu le gèngjiā quánmiàn ér shēnkè de lǐjiě.","meaning":"Sau khi trải qua nhiều thay đổi, Tiểu Lâm cuối cùng đã có được sự hiểu biết toàn diện và sâu sắc hơn về khởi nghiệp."}]
+
+请直接返回JSON，不要任何其他内容。`
 
   const raw = await askGemini(prompt)
 
-  // Xu ly ket qua -> cat bo dau ``` neu AI lo them vao
   let cleaned = raw.trim()
-  cleaned = cleaned.replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim()
+    .replace(/^```json/i, '')
+    .replace(/^```/, '')
+    .replace(/```$/, '')
+    .trim()
 
   let lines = []
   try {
@@ -47,9 +49,8 @@ VÍ DỤ:
         }))
     }
   } catch {
-    // Neu AI khong tra ve JSON chuan -> tach theo tung dong lam phuong an du phong
     lines = cleaned
-      .split('\n')
+      .split('\n\n')
       .map((s) => s.trim())
       .filter(Boolean)
       .map((s) => ({ hanzi: s, pinyin: '', meaning: '' }))

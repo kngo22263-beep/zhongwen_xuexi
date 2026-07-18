@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth.js'
 
-// Cac muc trong sidebar
 const MENU = [
   { to: '/admin', label: 'Dashboard Overview', icon: '🏠', end: true },
   {
@@ -23,6 +22,7 @@ const MENU = [
       { to: '/admin/import/reading', label: 'Bài Đọc' }
     ]
   },
+  { to: '/admin/hsk', label: 'Quản lý Học HSK', icon: '📚' },
   { to: '/admin/settings', label: 'Cài đặt Hệ thống', icon: '⚙️' }
 ]
 
@@ -42,7 +42,6 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-brand-50 flex flex-col">
-      {/* Thanh tren cung */}
       <header className="bg-white border-b border-brand-100 shadow-soft">
         <div className="px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/admin" className="flex items-center gap-2">
@@ -67,7 +66,6 @@ export default function AdminLayout() {
       </header>
 
       <div className="flex flex-1">
-        {/* Sidebar */}
         <aside className="w-64 shrink-0 bg-white border-r border-brand-100 p-3 hidden md:block">
           <nav className="space-y-1">
             {MENU.map((item) =>
@@ -105,7 +103,6 @@ export default function AdminLayout() {
           </nav>
         </aside>
 
-        {/* Noi dung trang admin */}
         <main className="flex-1 p-4 sm:p-6 overflow-auto">
           <Outlet />
         </main>
